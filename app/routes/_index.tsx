@@ -11,7 +11,9 @@ export const meta: MetaFunction = () => {
 };
 
 export let loader: LoaderFunction = async ({context}) => {
-  let response = await fetch((context.env as {API_URL: string}).API_URL + '/allDataPoints');
+  let fullUrl = (context.env as {API_URL: string}).API_URL + 'allDataPoints';
+  console.log("Fetching from URL: ", fullUrl);
+  let response = await fetch(fullUrl);
   let data = await response.json();
   return json(data);
 };
