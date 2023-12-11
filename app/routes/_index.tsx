@@ -39,7 +39,7 @@ function CustomChart({ data, title }) {
   let prevItem = null;
   const chartData = data.results.map(item => {
     const newItem = {
-      unixTime: new Date(item.unixTime).toISOString().slice(0, 16).replace('T', ' '),
+      unixTime: new Date(item.unixTime * 1000).toISOString().slice(0, 16).replace('T', ' '),
       price: item.price,
       sentimentScoreBelow50: item.longPositionPercentage < 50 ? item.longPositionPercentage : null,
       sentimentScoreAbove50: item.longPositionPercentage > 50 ? item.longPositionPercentage : null,
