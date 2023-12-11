@@ -8,9 +8,11 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import stylesheet from "./tailwind.css"; // Import Tailwind CSS file
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
+  { rel: "stylesheet", href: stylesheet }, // Added Tailwind CSS file to the links
 ];
 
 export default function App() {
@@ -19,6 +21,7 @@ export default function App() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico?v=3" />
         <Meta />
         <Links />
       </head>
