@@ -2,6 +2,7 @@ import type { MetaFunction, LoaderFunction } from "@remix-run/cloudflare";
 import { json } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
+import { useState } from 'react';
 
 export const meta: MetaFunction = () => {
   return [
@@ -11,7 +12,8 @@ export const meta: MetaFunction = () => {
 };
 
 export let loader: LoaderFunction = async ({context}) => {
-  let fullUrl = (context.env as {API_URL: string}).API_URL + 'dailyDataPoints';
+  const endpoint = '/allDataPoints';
+  let fullUrl = (context.env as {API_URL: string}).API_URL + endpoint;
   console.log("Fetching from URL: ", fullUrl);
   let response = await fetch(fullUrl);
   let data = await response.json();
@@ -86,13 +88,32 @@ function CustomChart({ data, title }) {
 }
 
 export default function Index() {
+  const [isAll, setIsAll] = useState(true);
   const data = useLoaderData();
 
+  const toggleData = (isAllButton) => {
+    setIsAll(isAllButton);
+  };
+  
   return (
     <div className="chart-container flex justify-center">
       <div className="mx-auto">
+        <div className="flex items-center justify-center py-2">
+          <button 
+            onClick={() => toggleData(true)} 
+            className={`px-4 py-2 rounded-l-lg ${isAll ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}
+          >
+            All
+          </button>
+          <button 
+            onClick={() => toggleData(false)} 
+            className={`px-4 py-2 rounded-r-lg ${!isAll ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}
+          >
+            Daily
+          </button>
+        </div>
         {Object.entries(data).map(([title, data], index) => (
-          <div key={index} className="p-4"> {/* Add padding here */}
+          <div key={index} className="p-4">
             <CustomChart key={title} title={title} data={data} />
           </div>
         ))}
