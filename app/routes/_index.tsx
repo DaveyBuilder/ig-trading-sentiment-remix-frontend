@@ -2,7 +2,7 @@ import type { MetaFunction, LoaderFunction } from "@remix-run/cloudflare";
 import { json } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export const meta: MetaFunction = () => {
   return [
@@ -12,12 +12,19 @@ export const meta: MetaFunction = () => {
 };
 
 export let loader: LoaderFunction = async ({context}) => {
-  const endpoint = '/allDataPoints';
-  let fullUrl = (context.env as {API_URL: string}).API_URL + endpoint;
-  console.log("Fetching from URL: ", fullUrl);
-  let response = await fetch(fullUrl);
-  let data = await response.json();
-  return json(data);
+  const baseURL = (context.env as {API_URL: string}).API_URL;
+  ///
+  let fullUrlAllData = baseURL + '/allDataPoints';
+  console.log("Fetching from URL: ", fullUrlAllData);
+  let responseAllData = await fetch(fullUrlAllData);
+  let allData = await responseAllData.json();
+  ///
+  let fullUrlDailyData = baseURL + '/dailyDataPoints';
+  console.log("Fetching from URL: ", fullUrlDailyData);
+  let responseDailyData = await fetch(fullUrlDailyData);
+  let dailyData = await responseDailyData.json();
+  ///
+  return json({allData, dailyData, apiUrl: (context.env as {API_URL: string}).API_URL});
 };
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -88,31 +95,40 @@ function CustomChart({ data, title }) {
 }
 
 export default function Index() {
-  const [isAll, setIsAll] = useState(true);
-  const data = useLoaderData();
+  const [chartType, setChartType] = useState('all');
+  const [data, setData] = useState(null);
+  const initialData = useLoaderData();
 
-  const toggleData = (isAllButton) => {
-    setIsAll(isAllButton);
-  };
-  
+  useEffect(() => {
+    if (chartType === 'daily') {
+      console.log('Setting daily data');
+      setData(initialData.dailyData);
+    } else if (chartType === 'all') {
+      console.log('Setting all data');
+      setData(initialData.allData);
+    }
+    // Add more else if conditions here for other chart types
+  }, [chartType, initialData]);
+
   return (
     <div className="chart-container flex justify-center">
       <div className="mx-auto">
         <div className="flex items-center justify-center py-2">
           <button 
-            onClick={() => toggleData(true)} 
-            className={`px-4 py-2 rounded-l-lg ${isAll ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}
+            onClick={() => setChartType('all')} 
+            className={`px-4 py-2 rounded-l-lg ${chartType === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}
           >
             All
           </button>
           <button 
-            onClick={() => toggleData(false)} 
-            className={`px-4 py-2 rounded-r-lg ${!isAll ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}
+            onClick={() => setChartType('daily')} 
+            className={`px-4 py-2 rounded-r-lg ${chartType === 'daily' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}
           >
             Daily
           </button>
+          {/* Add more buttons here for other chart types */}
         </div>
-        {Object.entries(data).map(([title, data], index) => (
+        {data && Object.entries(data).map(([title, data], index) => (
           <div key={index} className="p-4">
             <CustomChart key={title} title={title} data={data} />
           </div>
