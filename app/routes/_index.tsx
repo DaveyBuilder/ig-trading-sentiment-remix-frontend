@@ -74,23 +74,51 @@ function CustomChart({ data, title }) {
     return newItem;
   });
 
+  // Find the most recent sentiment score
+  let mostRecentSentimentScore = null;
+  for (let i = chartData.length - 1; i >= 0; i--) {
+    const item = chartData[i];
+    if (item.sentimentScoreIs50 !== null) {
+      mostRecentSentimentScore = item.sentimentScoreIs50;
+      break;
+    } else if (item.sentimentScoreBelow50 !== null) {
+      mostRecentSentimentScore = item.sentimentScoreBelow50;
+      break;
+    } else if (item.sentimentScoreAbove50 !== null) {
+      mostRecentSentimentScore = item.sentimentScoreAbove50;
+      break;
+    }
+  }
+
   return (
-    <>
-      <h2 className="text-center text-4xl">{title}</h2>
-      <LineChart width={1000} height={500} data={chartData}>
-        <Line type="monotone" dataKey="price" stroke="#8884d8" yAxisId="right" dot={false} />
-        <Line type="monotone" dataKey="sentimentScoreIs50" stroke="grey" dot={false} strokeWidth={6} />
-        <Line type="monotone" dataKey="sentimentScoreBelow50" stroke="red" dot={false} strokeWidth={6} />
-        <Line type="monotone" dataKey="sentimentScoreAbove50" stroke="green" dot={false} strokeWidth={6} />
-        <XAxis dataKey="unixTime" tick={false} />
-        <YAxis domain={[0, 100]} tick={false} />
-        <YAxis yAxisId="right" orientation="right" domain={['auto', 'auto']} tick={false} />
-        {/*<ReferenceLine y={50} stroke="black" strokeOpacity={0.5} />
-        <ReferenceLine y={25} stroke="grey" strokeOpacity={0.2} />
-        <ReferenceLine y={75} stroke="grey" strokeOpacity={0.2} />*/}
-        <Tooltip content={CustomTooltip} isAnimationActive={false} />
-      </LineChart>
-    </>
+    <div className="flex items-center">
+      <div>
+        <h2 className="text-center text-4xl">{title}</h2>
+        <LineChart width={1000} height={500} data={chartData}>
+          <Line type="monotone" dataKey="price" stroke="#8884d8" yAxisId="left" dot={false} />
+          <Line type="monotone" dataKey="sentimentScoreIs50" stroke="grey" dot={false} strokeWidth={6} yAxisId="right" />
+          <Line type="monotone" dataKey="sentimentScoreBelow50" stroke="red" dot={false} strokeWidth={6} yAxisId="right" />
+          <Line type="monotone" dataKey="sentimentScoreAbove50" stroke="green" dot={false} strokeWidth={6} yAxisId="right" />
+          <XAxis dataKey="unixTime" tick={false} />
+          <YAxis yAxisId="left" domain={['auto', 'auto']} tick={false} />
+          <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
+          {/*<ReferenceLine y={50} stroke="black" strokeOpacity={0.5} />
+          <ReferenceLine y={25} stroke="grey" strokeOpacity={0.2} />
+          <ReferenceLine y={75} stroke="grey" strokeOpacity={0.2} />*/}
+          <Tooltip content={CustomTooltip} isAnimationActive={false} />
+        </LineChart>
+      </div>
+      <div className="ml-4">
+        <span style={{ 
+          color: 'white', 
+          backgroundColor: mostRecentSentimentScore < 50 ? 'red' : mostRecentSentimentScore > 50 ? 'green' : 'grey',
+          borderRadius: '5px',
+          padding: '5px'
+        }}>
+          {mostRecentSentimentScore}
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -112,24 +140,24 @@ export default function Index() {
 
   return (
     <div className="chart-container flex justify-center">
+      <div className="fixed left-16 top-4 space-y-2">
+        <button 
+          onClick={() => setChartType('all')} 
+          className={`px-4 py-2 rounded-l-lg ${chartType === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}
+        >
+          All
+        </button>
+        <button 
+          onClick={() => setChartType('daily')} 
+          className={`px-4 py-2 rounded-r-lg ${chartType === 'daily' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}
+        >
+          Daily
+        </button>
+        {/* Add more buttons here for other chart types */}
+      </div>
       <div className="mx-auto">
-        <div className="flex items-center justify-center py-2">
-          <button 
-            onClick={() => setChartType('all')} 
-            className={`px-4 py-2 rounded-l-lg ${chartType === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}
-          >
-            All
-          </button>
-          <button 
-            onClick={() => setChartType('daily')} 
-            className={`px-4 py-2 rounded-r-lg ${chartType === 'daily' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}
-          >
-            Daily
-          </button>
-          {/* Add more buttons here for other chart types */}
-        </div>
         {data && Object.entries(data).map(([title, data], index) => (
-          <div key={index} className="p-4">
+          <div key={index} className="p-4 my-4">
             <CustomChart key={title} title={title} data={data} />
           </div>
         ))}
