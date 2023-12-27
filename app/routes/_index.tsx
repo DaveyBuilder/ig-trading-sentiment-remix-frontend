@@ -48,7 +48,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 function CustomChart({ data, title }) {
   let prevItem = null;
-  const chartData = data.results.map(item => {
+  const chartData = data.results ? data.results.map(item => {
     const newItem = {
       unixTime: new Date(item.unixTime * 1000).toISOString().slice(0, 16).replace('T', ' '),
       price: item.price,
@@ -74,7 +74,7 @@ function CustomChart({ data, title }) {
 
     prevItem = item;
     return newItem;
-  });
+  }) : [];
 
   // Find the most recent sentiment score
   let mostRecentSentimentScore = null;
