@@ -11,6 +11,8 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+//Make typescript changes
+
 export let loader: LoaderFunction = async ({context}) => {
   const baseURL = (context.env as {API_URL: string}).API_URL;
   ///
