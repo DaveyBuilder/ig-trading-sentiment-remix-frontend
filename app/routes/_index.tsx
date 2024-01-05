@@ -15,17 +15,15 @@ export const meta: MetaFunction = () => {
 
 export let loader: LoaderFunction = async ({context}) => {
   const baseURL = (context.env as {API_URL: string}).API_URL;
-  ///
+  /// Getting all data
   let fullUrlAllData = baseURL + '/allDataPoints';
-  console.log("Fetching from URL: ", fullUrlAllData);
   let responseAllData = await fetch(fullUrlAllData);
   let allData = await responseAllData.json();
-  ///
+  /// Getting daily data
   let fullUrlDailyData = baseURL + '/dailyDataPoints';
-  console.log("Fetching from URL: ", fullUrlDailyData);
   let responseDailyData = await fetch(fullUrlDailyData);
   let dailyData = await responseDailyData.json();
-  ///
+  /// Returning both data sets in one object
   return json({allData, dailyData, apiUrl: (context.env as {API_URL: string}).API_URL});
 };
 
