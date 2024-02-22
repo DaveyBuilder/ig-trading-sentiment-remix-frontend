@@ -16,15 +16,17 @@ export const meta: MetaFunction = () => {
 export let loader: LoaderFunction = async ({context}) => {
   const baseURL = (context.env as {API_URL: string}).API_URL;
   /// Getting all data
-  let fullUrlAllData = baseURL + '/allDataPoints';
-  let responseAllData = await fetch(fullUrlAllData);
-  let allData = await responseAllData.json();
+  // let fullUrlAllData = baseURL + '/allDataPoints';
+  // let responseAllData = await fetch(fullUrlAllData);
+  // let allData = await responseAllData.json();
   /// Getting daily data
   let fullUrlDailyData = baseURL + '/dailyDataPoints';
   let responseDailyData = await fetch(fullUrlDailyData);
   let dailyData = await responseDailyData.json();
   /// Returning both data sets in one object
-  return json({allData, dailyData, apiUrl: (context.env as {API_URL: string}).API_URL});
+  //return json({allData, dailyData, apiUrl: (context.env as {API_URL: string}).API_URL});
+  // Returning only daily data
+  return json({dailyData, apiUrl: (context.env as {API_URL: string}).API_URL});
 };
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -123,11 +125,16 @@ function CustomChart({ data, title }) {
 }
 
 export default function Index() {
-  const [chartType, setChartType] = useState('all');
+  //const [chartType, setChartType] = useState('all');
   const [data, setData] = useState(null);
   const initialData = useLoaderData();
 
   useEffect(() => {
+    // Always setting daily data since that's the only data we're working with now
+    console.log('Setting daily data');
+    setData(initialData.dailyData);
+    // No need for checking chartType since we're not toggling between data types anymore
+    /*
     if (chartType === 'daily') {
       console.log('Setting daily data');
       setData(initialData.dailyData);
@@ -136,10 +143,12 @@ export default function Index() {
       setData(initialData.allData);
     }
     // Add more else if conditions here for other chart types
-  }, [chartType, initialData]);
+    */
+  }, [initialData]); // Removed chartType from dependency array
 
   return (
     <div className="chart-container flex justify-center">
+      {/* Commenting out the toggle buttons as they are no longer needed
       <div className="fixed left-16 top-4 space-y-2">
         <button 
           onClick={() => setChartType('all')} 
@@ -153,8 +162,8 @@ export default function Index() {
         >
           Daily
         </button>
-        {/* Add more buttons here for other chart types */}
       </div>
+      */}
       <div className="mx-auto">
         {data && Object.entries(data).map(([title, data], index) => (
           <div key={index} className="p-4 my-4">
